@@ -216,6 +216,7 @@
       controller:
         devstack_localrc:
           # From devstack "vars:"
+          DIB_LOCAL_ELEMENTS: openstack-ci-mirrors
           DATABASE_USER: octavia
           DATABASE_PASSWORD: octavia_database_pw
           RABBIT_PASSWORD: octavia_rabbit_pw
@@ -542,6 +543,19 @@
           "$TEMPEST_CONFIG":
             load_balancer:
               loadbalancer_topology: ACTIVE_STANDBY
+
+- job:
+    name: octavia-v2-az-dsvm-scenario-two-node
+    parent: octavia-dsvm-live-two-node-base
+    vars:
+      tempest_concurrency: 2
+      tempest_test_regex: ^octavia_tempest_plugin.tests.az_scenario.v2
+      tox_envlist: all
+      devstack_local_conf:
+        test-config:
+          "$TEMPEST_CONFIG":
+            compute:
+              min_compute_nodes: 2
 
 - job:
     name: octavia-v2-dsvm-py2-scenario-centos-7

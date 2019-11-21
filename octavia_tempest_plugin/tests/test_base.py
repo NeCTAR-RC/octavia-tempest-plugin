@@ -518,6 +518,8 @@ class LoadBalancerAdminBaseTest(LoadBalancerBaseTest):
             cls.os_admin.availability_zone_profile_client)
         cls.lb_admin_availability_zone_client = (
             cls.os_admin.availability_zone_client)
+        cls.os_admin_aggregates_client = cls.os_admin.aggregates_client
+        cls.os_admin_services_client = cls.os_admin.services_client
 
 
 class LoadBalancerBaseTestWithCompute(LoadBalancerAdminBaseTest):
