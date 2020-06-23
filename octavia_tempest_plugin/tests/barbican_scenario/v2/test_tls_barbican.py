@@ -120,9 +120,9 @@ class TLSWithBarbicanTest(test_base.LoadBalancerBaseTestWithCompute):
             format=serialization.PublicFormat.SubjectPublicKeyInfo))
 
         # Load the secret into the barbican service under the
-        # os_roles_lb_member tenant
+        # os_primary tenant
         cls.barbican_mgr = barbican_client_mgr.BarbicanClientManager(
-            cls.os_roles_lb_member)
+            cls.os_primary)
 
         # Create a server cert and key
         # This will be used as the "default certificate" in SNI tests.

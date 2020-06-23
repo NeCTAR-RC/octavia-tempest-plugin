@@ -27,7 +27,7 @@ from octavia_tempest_plugin.tests import waiters
 CONF = config.CONF
 
 
-class AmphoraScenarioTest(test_base.LoadBalancerBaseTest):
+class AmphoraScenarioTest(test_base.LoadBalancerAdminBaseTest):
     """Test the amphora object API."""
 
     @classmethod
@@ -94,7 +94,7 @@ class AmphoraScenarioTest(test_base.LoadBalancerBaseTest):
 
         # Test that a user with lb_admin role can list the amphora
         if CONF.load_balancer.RBAC_test_type == const.ADVANCED:
-            amphora_client = self.os_roles_lb_admin.amphora_client
+            amphora_client = self.os_admin.amphora_client
             amphora_adm = amphora_client.list_amphorae()
             self.assertGreaterEqual(
                 len(amphora_adm), 2 * self._expected_amp_count(amphora_adm))
@@ -102,7 +102,7 @@ class AmphoraScenarioTest(test_base.LoadBalancerBaseTest):
         # Test that a different user, with load balancer member role, cannot
         # see this amphora
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.amphora_client
+            member2_client = self.os_alt.amphora_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.list_amphorae)
 

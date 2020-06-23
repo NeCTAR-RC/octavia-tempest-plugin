@@ -330,7 +330,7 @@ class MemberAPITest(test_base.LoadBalancerBaseTest):
 
         # Test that a different user cannot list members
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.member_client
+            member2_client = self.os_alt.member_client
             self.assertRaises(
                 exceptions.Forbidden,
                 member2_client.list_members,
@@ -507,7 +507,7 @@ class MemberAPITest(test_base.LoadBalancerBaseTest):
 
         # Test that a user with lb_admin role can see the member
         if CONF.load_balancer.RBAC_test_type == const.ADVANCED:
-            member_client = self.os_roles_lb_admin.member_client
+            member_client = self.os_admin.member_client
             member_adm = member_client.show_member(
                 member[const.ID], pool_id=self.pool_id)
             self.assertEqual(member_name, member_adm[const.NAME])
@@ -521,7 +521,7 @@ class MemberAPITest(test_base.LoadBalancerBaseTest):
         # Test that a different user, with load balancer member role, cannot
         # see this member
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.member_client
+            member2_client = self.os_alt.member_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.show_member,
                               member[const.ID], pool_id=self.pool_id)
@@ -646,7 +646,7 @@ class MemberAPITest(test_base.LoadBalancerBaseTest):
         # Test that a user, without the load balancer member role, cannot
         # update this member
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.member_client
+            member2_client = self.os_alt.member_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.update_member,
                               member[const.ID], pool_id=self.pool_id,
@@ -930,7 +930,7 @@ class MemberAPITest(test_base.LoadBalancerBaseTest):
         # Test that a different user, with the load balancer member role
         # cannot delete this member
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.member_client
+            member2_client = self.os_alt.member_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.delete_member,
                               member[const.ID], pool_id=self.pool_id)

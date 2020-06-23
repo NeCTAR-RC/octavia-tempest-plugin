@@ -318,7 +318,7 @@ class PoolAPITest(test_base.LoadBalancerBaseTest):
 
         # Test that a different user cannot list pools
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.pool_client
+            member2_client = self.os_alt.pool_client
             primary = member2_client.list_pools(
                 query_params='loadbalancer_id={lb_id}'.format(lb_id=lb_id))
             self.assertEqual(0, len(primary))
@@ -486,7 +486,7 @@ class PoolAPITest(test_base.LoadBalancerBaseTest):
 
         # Test that a user with lb_admin role can see the pool
         if CONF.load_balancer.RBAC_test_type == const.ADVANCED:
-            pool_client = self.os_roles_lb_admin.pool_client
+            pool_client = self.os_admin.pool_client
             pool_adm = pool_client.show_pool(pool[const.ID])
             self.assertEqual(pool_name, pool_adm[const.NAME])
 
@@ -499,7 +499,7 @@ class PoolAPITest(test_base.LoadBalancerBaseTest):
         # Test that a different user, with load balancer member role, cannot
         # see this pool
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.pool_client
+            member2_client = self.os_alt.pool_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.show_pool,
                               pool[const.ID])
@@ -598,7 +598,7 @@ class PoolAPITest(test_base.LoadBalancerBaseTest):
         # Test that a user, without the load balancer member role, cannot
         # update this pool
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.pool_client
+            member2_client = self.os_alt.pool_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.update_pool,
                               pool[const.ID], admin_state_up=True)
@@ -718,7 +718,7 @@ class PoolAPITest(test_base.LoadBalancerBaseTest):
         # Test that a different user, with the load balancer member role
         # cannot delete this pool
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.pool_client
+            member2_client = self.os_alt.pool_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.delete_pool,
                               pool[const.ID])

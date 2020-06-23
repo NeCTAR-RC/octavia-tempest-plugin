@@ -115,7 +115,7 @@ class AmphoraAPITest(test_base.LoadBalancerBaseTest):
                               amphora_1[const.ID])
             self.assertRaises(
                 exceptions.Forbidden,
-                self.os_roles_lb_member.amphora_client.amphora_failover,
+                self.os_primary.amphora_client.amphora_failover,
                 amphora_1[const.ID])
 
         self.lb_admin_amphora_client.amphora_failover(amphora_1[const.ID])
