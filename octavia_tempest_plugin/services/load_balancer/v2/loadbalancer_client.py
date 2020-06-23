@@ -39,7 +39,8 @@ class LoadbalancerClient(base_client.BaseLBaaSClient):
                             listeners=Unset, project_id=Unset, provider=Unset,
                             vip_address=Unset, vip_network_id=Unset,
                             vip_port_id=Unset, vip_qos_policy_id=Unset,
-                            vip_subnet_id=Unset, availability_zone=Unset,
+                            vip_subnet_id=Unset,
+                            availability_zone=CONF.load_balancer.availability_zone or Unset,
                             return_object_only=True):
         """Create a loadbalancer.
 
