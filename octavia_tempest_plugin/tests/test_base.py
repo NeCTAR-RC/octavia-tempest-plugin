@@ -54,12 +54,12 @@ SRC_PORT_NUMBER_MAX = 61000
 class LoadBalancerBaseTest(test.BaseTestCase):
     """Base class for load balancer tests."""
 
-    # Setup cls.os_roles_lb_member. cls.os_primary, cls.os_roles_lb_member,
-    # and cls.os_roles_lb_admin credentials.
-    credentials = ['admin', 'primary',
-                   ['lb_member', CONF.load_balancer.member_role],
-                   ['lb_member2', CONF.load_balancer.member_role],
-                   ['lb_admin', CONF.load_balancer.admin_role]]
+    # Setup cls.os_primary creds. Also set up cls.os_alt
+    # and os_admin credentials if RBAC testing configured
+    credentials = ['primary']
+    if CONF.load_balancer.RBAC_test_type != const.NONE:
+        credentials.append('alt')
+        credentials.append('admin')
 
     client_manager = clients.ManagerV2
     webserver1_response = 1
@@ -110,41 +110,28 @@ class LoadBalancerBaseTest(test.BaseTestCase):
     def setup_clients(cls):
         """Setup client aliases."""
         super(LoadBalancerBaseTest, cls).setup_clients()
-        cls.lb_mem_float_ip_client = cls.os_roles_lb_member.floating_ips_client
-        cls.lb_mem_keypairs_client = cls.os_roles_lb_member.keypairs_client
-        cls.lb_mem_net_client = cls.os_roles_lb_member.networks_client
-        cls.lb_mem_ports_client = cls.os_roles_lb_member.ports_client
-        cls.lb_mem_routers_client = cls.os_roles_lb_member.routers_client
-        cls.lb_mem_SG_client = cls.os_roles_lb_member.security_groups_client
+        cls.lb_mem_float_ip_client = cls.os_primary.floating_ips_client
+        cls.lb_mem_keypairs_client = cls.os_primary.keypairs_client
+        cls.lb_mem_net_client = cls.os_primary.networks_client
+        cls.lb_mem_ports_client = cls.os_primary.ports_client
+        cls.lb_mem_routers_client = cls.os_primary.routers_client
+        cls.lb_mem_SG_client = cls.os_primary.security_groups_client
         cls.lb_mem_SGr_client = (
-            cls.os_roles_lb_member.security_group_rules_client)
-        cls.lb_mem_servers_client = cls.os_roles_lb_member.servers_client
-        cls.lb_mem_subnet_client = cls.os_roles_lb_member.subnets_client
-        cls.mem_lb_client = cls.os_roles_lb_member.loadbalancer_client
-        cls.mem_listener_client = cls.os_roles_lb_member.listener_client
-        cls.mem_pool_client = cls.os_roles_lb_member.pool_client
-        cls.mem_member_client = cls.os_roles_lb_member.member_client
+            cls.os_primary.security_group_rules_client)
+        cls.lb_mem_servers_client = cls.os_primary.servers_client
+        cls.lb_mem_subnet_client = cls.os_primary.subnets_client
+        cls.mem_lb_client = cls.os_primary.loadbalancer_client
+        cls.mem_listener_client = cls.os_primary.listener_client
+        cls.mem_pool_client = cls.os_primary.pool_client
+        cls.mem_member_client = cls.os_primary.member_client
         cls.mem_healthmonitor_client = (
-            cls.os_roles_lb_member.healthmonitor_client)
-        cls.mem_l7policy_client = cls.os_roles_lb_member.l7policy_client
-        cls.mem_l7rule_client = cls.os_roles_lb_member.l7rule_client
-        cls.lb_admin_amphora_client = cls.os_roles_lb_admin.amphora_client
-        cls.lb_admin_flavor_profile_client = (
-            cls.os_roles_lb_admin.flavor_profile_client)
-        cls.lb_admin_flavor_client = cls.os_roles_lb_admin.flavor_client
-        cls.mem_flavor_client = cls.os_roles_lb_member.flavor_client
-        cls.mem_provider_client = cls.os_roles_lb_member.provider_client
-        cls.os_admin_servers_client = cls.os_admin.servers_client
-        cls.lb_admin_flavor_capabilities_client = (
-            cls.os_roles_lb_admin.flavor_capabilities_client)
-        cls.lb_admin_availability_zone_capabilities_client = (
-            cls.os_roles_lb_admin.availability_zone_capabilities_client)
-        cls.lb_admin_availability_zone_profile_client = (
-            cls.os_roles_lb_admin.availability_zone_profile_client)
-        cls.lb_admin_availability_zone_client = (
-            cls.os_roles_lb_admin.availability_zone_client)
+            cls.os_primary.healthmonitor_client)
+        cls.mem_l7policy_client = cls.os_primary.l7policy_client
+        cls.mem_l7rule_client = cls.os_primary.l7rule_client
+        cls.mem_flavor_client = cls.os_primary.flavor_client
+        cls.mem_provider_client = cls.os_primary.provider_client
         cls.mem_availability_zone_client = (
-            cls.os_roles_lb_member.availability_zone_client)
+            cls.os_primary.availability_zone_client)
 
     @classmethod
     def resource_setup(cls):
@@ -331,7 +318,7 @@ class LoadBalancerBaseTest(test.BaseTestCase):
         # Create tenant VIP IPv6 subnet
         if CONF.load_balancer.test_with_ipv6:
             # See if ipv6-private-subnet exists and use it if so.
-            priv_ipv6_subnet = cls.os_admin.subnets_client.list_subnets(
+            priv_ipv6_subnet = cls.os_primary.subnets_client.list_subnets(
                 name='ipv6-private-subnet')['subnets']
 
             cls.lb_member_vip_ipv6_subnet_stateful = False
@@ -482,7 +469,7 @@ class LoadBalancerBaseTest(test.BaseTestCase):
                 if CONF.load_balancer.test_with_noop:
                     lb_vip_address = '198.18.33.33'
                 else:
-                    subnet = cls.os_admin.subnets_client.show_subnet(subnet_id)
+                    subnet = cls.os_primary.subnets_client.show_subnet(subnet_id)
                     network = ipaddress.IPv4Network(subnet['subnet']['cidr'])
                     lb_vip_address = str(network[ip_index])
             else:
@@ -490,7 +477,7 @@ class LoadBalancerBaseTest(test.BaseTestCase):
                 if CONF.load_balancer.test_with_noop:
                     lb_vip_address = '2001:db8:33:33:33:33:33:33'
                 else:
-                    subnet = cls.os_admin.subnets_client.show_subnet(subnet_id)
+                    subnet = cls.os_primary.subnets_client.show_subnet(subnet_id)
                     network = ipaddress.IPv6Network(subnet['subnet']['cidr'])
                     lb_vip_address = str(network[ip_index])
                     # If the subnet is IPv6 slaac or dhcpv6-stateless
@@ -508,7 +495,32 @@ class LoadBalancerBaseTest(test.BaseTestCase):
             lb_kwargs[const.VIP_SUBNET_ID] = None
 
 
-class LoadBalancerBaseTestWithCompute(LoadBalancerBaseTest):
+class LoadBalancerAdminBaseTest(LoadBalancerBaseTest):
+    """Base class for load balancer tests that need admin creds."""
+
+    # Setup cls.os_primary. cls.os_alt, cls.os_admin credentials
+    credentials = ['admin', 'primary', 'alt']
+
+    @classmethod
+    def setup_clients(cls):
+        """Setup client aliases."""
+        super(LoadBalancerAdminBaseTest, cls).setup_clients()
+        cls.os_admin_servers_client = cls.os_admin.servers_client
+        cls.lb_admin_amphora_client = cls.os_admin.amphora_client
+        cls.lb_admin_flavor_profile_client = (
+            cls.os_admin.flavor_profile_client)
+        cls.lb_admin_flavor_client = cls.os_admin.flavor_client
+        cls.lb_admin_flavor_capabilities_client = (
+            cls.os_admin.flavor_capabilities_client)
+        cls.lb_admin_availability_zone_capabilities_client = (
+            cls.os_admin.availability_zone_capabilities_client)
+        cls.lb_admin_availability_zone_profile_client = (
+            cls.os_admin.availability_zone_profile_client)
+        cls.lb_admin_availability_zone_client = (
+            cls.os_admin.availability_zone_client)
+
+
+class LoadBalancerBaseTestWithCompute(LoadBalancerAdminBaseTest):
     @classmethod
     def resource_setup(cls):
         super(LoadBalancerBaseTestWithCompute, cls).resource_setup()

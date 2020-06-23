@@ -433,7 +433,7 @@ class ListenerAPITest(test_base.LoadBalancerBaseTest):
 
         # Test that a different user cannot list listeners
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.listener_client
+            member2_client = self.os_alt.listener_client
             primary = member2_client.list_listeners(
                 query_params='loadbalancer_id={lb_id}'.format(lb_id=lb_id))
             self.assertEqual(0, len(primary))
@@ -635,7 +635,7 @@ class ListenerAPITest(test_base.LoadBalancerBaseTest):
 
         # Test that a user with lb_admin role can see the listener
         if CONF.load_balancer.RBAC_test_type == const.ADVANCED:
-            listener_client = self.os_roles_lb_admin.listener_client
+            listener_client = self.os_admin.listener_client
             listener_adm = listener_client.show_listener(listener[const.ID])
             self.assertEqual(listener_name, listener_adm[const.NAME])
 
@@ -648,7 +648,7 @@ class ListenerAPITest(test_base.LoadBalancerBaseTest):
         # Test that a different user, with load balancer member role, cannot
         # see this listener
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.listener_client
+            member2_client = self.os_alt.listener_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.show_listener,
                               listener[const.ID])
@@ -761,7 +761,7 @@ class ListenerAPITest(test_base.LoadBalancerBaseTest):
         # Test that a user, without the load balancer member role, cannot
         # update this listener
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.listener_client
+            member2_client = self.os_alt.listener_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.update_listener,
                               listener[const.ID], admin_state_up=True)
@@ -883,7 +883,7 @@ class ListenerAPITest(test_base.LoadBalancerBaseTest):
         # Test that a different user, with the load balancer member role
         # cannot delete this listener
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.listener_client
+            member2_client = self.os_alt.listener_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.delete_listener,
                               listener[const.ID])
@@ -962,7 +962,7 @@ class ListenerAPITest(test_base.LoadBalancerBaseTest):
         # Test that a different user, with the load balancer role, cannot see
         # the listener stats
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.listener_client
+            member2_client = self.os_alt.listener_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.get_listener_stats,
                               listener[const.ID])

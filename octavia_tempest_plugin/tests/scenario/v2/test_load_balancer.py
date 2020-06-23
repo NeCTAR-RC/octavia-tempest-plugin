@@ -134,7 +134,7 @@ class LoadBalancerScenarioTest(test_base.LoadBalancerBaseTest):
         UUID(lb[const.ID])
         self.assertEqual(lb_name, lb[const.NAME])
         self.assertEqual(const.OFFLINE, lb[const.OPERATING_STATUS])
-        self.assertEqual(self.os_roles_lb_member.credentials.project_id,
+        self.assertEqual(self.os_primary.credentials.project_id,
                          lb[const.PROJECT_ID])
         self.assertEqual(CONF.load_balancer.provider, lb[const.PROVIDER])
         if ip_version == 4:

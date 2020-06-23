@@ -335,7 +335,7 @@ class L7PolicyAPITest(test_base.LoadBalancerBaseTest):
 
         # Test that a different user cannot list l7policies
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.l7policy_client
+            member2_client = self.os_alt.l7policy_client
             primary = member2_client.list_l7policies(
                 query_params='listener_id={listener_id}'.format(
                     listener_id=listener_id))
@@ -557,7 +557,7 @@ class L7PolicyAPITest(test_base.LoadBalancerBaseTest):
 
         # Test that a user with lb_admin role can see the l7policy
         if CONF.load_balancer.RBAC_test_type == const.ADVANCED:
-            l7policy_client = self.os_roles_lb_admin.l7policy_client
+            l7policy_client = self.os_admin.l7policy_client
             l7policy_adm = l7policy_client.show_l7policy(l7policy[const.ID])
             self.assertEqual(l7policy_name, l7policy_adm[const.NAME])
 
@@ -570,7 +570,7 @@ class L7PolicyAPITest(test_base.LoadBalancerBaseTest):
         # Test that a different user, with load balancer member role, cannot
         # see this l7policy
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.l7policy_client
+            member2_client = self.os_alt.l7policy_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.show_l7policy,
                               l7policy[const.ID])
@@ -683,7 +683,7 @@ class L7PolicyAPITest(test_base.LoadBalancerBaseTest):
         # Test that a user, without the load balancer member role, cannot
         # update this l7policy
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.l7policy_client
+            member2_client = self.os_alt.l7policy_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.update_l7policy,
                               l7policy[const.ID], admin_state_up=True)
@@ -784,7 +784,7 @@ class L7PolicyAPITest(test_base.LoadBalancerBaseTest):
         # Test that a different user, with the load balancer member role
         # cannot delete this l7policy
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.l7policy_client
+            member2_client = self.os_alt.l7policy_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.delete_l7policy,
                               l7policy[const.ID])

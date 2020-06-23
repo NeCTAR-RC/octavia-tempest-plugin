@@ -115,7 +115,7 @@ class LoadBalancerAPITest(test_base.LoadBalancerBaseTest):
                 self.assertEqual(self.lb_member_vip_ipv6_net[const.ID],
                                  lb[const.VIP_NETWORK_ID])
 
-        self.assertEqual(self.os_roles_lb_member.credentials.project_id,
+        self.assertEqual(self.os_primary.credentials.project_id,
                          lb[const.PROJECT_ID])
         self.assertEqual(CONF.load_balancer.provider, lb[const.PROVIDER])
         self.assertIsNotNone(lb[const.VIP_PORT_ID])
@@ -173,7 +173,7 @@ class LoadBalancerAPITest(test_base.LoadBalancerBaseTest):
         # Test that a different user, with the load balancer member role
         # cannot delete this load balancer
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.loadbalancer_client
+            member2_client = self.os_alt.loadbalancer_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.delete_loadbalancer,
                               lb[const.ID])
@@ -222,7 +222,7 @@ class LoadBalancerAPITest(test_base.LoadBalancerBaseTest):
         # Test that a different user, with the load balancer member role
         # cannot delete this load balancer
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.loadbalancer_client
+            member2_client = self.os_alt.loadbalancer_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.delete_loadbalancer,
                               lb[const.ID], cascade=True)
@@ -349,7 +349,7 @@ class LoadBalancerAPITest(test_base.LoadBalancerBaseTest):
 
         # Test that a different user cannot list load balancers
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.loadbalancer_client
+            member2_client = self.os_alt.loadbalancer_client
             primary = member2_client.list_loadbalancers()
             self.assertEqual(0, len(primary))
 
@@ -484,7 +484,7 @@ class LoadBalancerAPITest(test_base.LoadBalancerBaseTest):
         UUID(lb[const.ID])
         self.assertEqual(lb_name, lb[const.NAME])
         self.assertEqual(const.OFFLINE, lb[const.OPERATING_STATUS])
-        self.assertEqual(self.os_roles_lb_member.credentials.project_id,
+        self.assertEqual(self.os_primary.credentials.project_id,
                          lb[const.PROJECT_ID])
         self.assertEqual(CONF.load_balancer.provider, lb[const.PROVIDER])
         self.assertEqual(self.lb_member_vip_net[const.ID],
@@ -498,7 +498,7 @@ class LoadBalancerAPITest(test_base.LoadBalancerBaseTest):
 
         # Test that a user with lb_admin role can see the load balanacer
         if CONF.load_balancer.RBAC_test_type == const.ADVANCED:
-            lb_client = self.os_roles_lb_admin.loadbalancer_client
+            lb_client = self.os_admin.loadbalancer_client
             lb_adm = lb_client.show_loadbalancer(lb[const.ID])
             self.assertEqual(lb_name, lb_adm[const.NAME])
 
@@ -511,7 +511,7 @@ class LoadBalancerAPITest(test_base.LoadBalancerBaseTest):
         # Test that a different user, with load balancer member role, cannot
         # see this load balancer
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.loadbalancer_client
+            member2_client = self.os_alt.loadbalancer_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.show_loadbalancer,
                               lb[const.ID])
@@ -582,7 +582,7 @@ class LoadBalancerAPITest(test_base.LoadBalancerBaseTest):
         UUID(lb[const.ID])
         self.assertEqual(lb_name, lb[const.NAME])
         self.assertEqual(const.OFFLINE, lb[const.OPERATING_STATUS])
-        self.assertEqual(self.os_roles_lb_member.credentials.project_id,
+        self.assertEqual(self.os_primary.credentials.project_id,
                          lb[const.PROJECT_ID])
         self.assertEqual(CONF.load_balancer.provider, lb[const.PROVIDER])
         self.assertEqual(self.lb_member_vip_net[const.ID],
@@ -614,7 +614,7 @@ class LoadBalancerAPITest(test_base.LoadBalancerBaseTest):
         # Test that a user, without the load balancer member role, cannot
         # update this load balancer
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.loadbalancer_client
+            member2_client = self.os_alt.loadbalancer_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.update_loadbalancer,
                               lb[const.ID], admin_state_up=True)
@@ -691,7 +691,7 @@ class LoadBalancerAPITest(test_base.LoadBalancerBaseTest):
         # Test that a different user, with the load balancer role, cannot see
         # the load balancer stats
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.loadbalancer_client
+            member2_client = self.os_alt.loadbalancer_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.get_loadbalancer_stats,
                               lb[const.ID])
@@ -759,7 +759,7 @@ class LoadBalancerAPITest(test_base.LoadBalancerBaseTest):
         # Test that a different user, with load balancer role, cannot see
         # the load balancer status
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.loadbalancer_client
+            member2_client = self.os_alt.loadbalancer_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.get_loadbalancer_status,
                               lb[const.ID])
@@ -791,6 +791,10 @@ class LoadBalancerAPITest(test_base.LoadBalancerBaseTest):
                 CONF.load_balancer.lb_build_timeout)
         except Exception:
             pass
+
+
+class LoadBalancerAdminAPITest(test_base.LoadBalancerAdminBaseTest):
+    """Test the load balancer object admin API."""
 
     @decorators.idempotent_id('fc2e07a6-9776-4559-90c9-141170d4c397')
     def test_load_balancer_failover(self):
@@ -831,7 +835,7 @@ class LoadBalancerAPITest(test_base.LoadBalancerBaseTest):
                 query_params='{loadbalancer_id}={lb_id}'.format(
                     loadbalancer_id=const.LOADBALANCER_ID, lb_id=lb[const.ID]))
 
-        self.os_roles_lb_admin.loadbalancer_client.failover_loadbalancer(
+        self.os_admin.loadbalancer_client.failover_loadbalancer(
             lb[const.ID])
 
         lb = waiters.wait_for_status(self.mem_lb_client.show_loadbalancer,

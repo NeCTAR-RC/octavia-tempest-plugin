@@ -342,7 +342,7 @@ class HealthMonitorAPITest(test_base.LoadBalancerBaseTest):
 
         # Test that a different user cannot list healthmonitors
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.healthmonitor_client
+            member2_client = self.os_alt.healthmonitor_client
             primary = member2_client.list_healthmonitors(
                 query_params='pool_id={pool_id}'.format(pool_id=pool1_id))
             self.assertEqual(0, len(primary))
@@ -534,7 +534,7 @@ class HealthMonitorAPITest(test_base.LoadBalancerBaseTest):
 
         # Test that a user with lb_admin role can see the healthmonitor
         if CONF.load_balancer.RBAC_test_type == const.ADVANCED:
-            healthmonitor_client = self.os_roles_lb_admin.healthmonitor_client
+            healthmonitor_client = self.os_admin.healthmonitor_client
             hm_adm = healthmonitor_client.show_healthmonitor(hm[const.ID])
             self.assertEqual(hm_name, hm_adm[const.NAME])
 
@@ -547,7 +547,7 @@ class HealthMonitorAPITest(test_base.LoadBalancerBaseTest):
         # Test that a different user, with loadbalancer member role, cannot
         # see this healthmonitor
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.healthmonitor_client
+            member2_client = self.os_alt.healthmonitor_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.show_healthmonitor,
                               hm[const.ID])
@@ -661,7 +661,7 @@ class HealthMonitorAPITest(test_base.LoadBalancerBaseTest):
         # Test that a user, without the loadbalancer member role, cannot
         # update this healthmonitor
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.healthmonitor_client
+            member2_client = self.os_alt.healthmonitor_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.update_healthmonitor,
                               hm[const.ID], admin_state_up=True)
@@ -782,7 +782,7 @@ class HealthMonitorAPITest(test_base.LoadBalancerBaseTest):
         # Test that a different user, with the loadbalancer member role
         # cannot delete this healthmonitor
         if not CONF.load_balancer.RBAC_test_type == const.NONE:
-            member2_client = self.os_roles_lb_member2.healthmonitor_client
+            member2_client = self.os_alt.healthmonitor_client
             self.assertRaises(exceptions.Forbidden,
                               member2_client.delete_healthmonitor,
                               hm[const.ID])
